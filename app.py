@@ -244,6 +244,8 @@ def get_results(
     eccentricity,
     planet_num,
 ):
+    string_list = [planet_mass, semi_major_axis, eccentricity]
+    planet_mass, semi_major_axis, eccentricity = comma_strings_to_list(string_list)
     try:
         i = planet_num - 1
         list_to_give = [
@@ -284,7 +286,6 @@ def update_figure(
 ):
 
     string_list = [planet_mass, semi_major_axis, eccentricity]
-    print(string_list)
     planet_mass, semi_major_axis, eccentricity = comma_strings_to_list(string_list)
     assert all(
         len(i) == n_planets for i in [planet_mass, semi_major_axis, eccentricity]

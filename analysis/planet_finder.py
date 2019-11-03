@@ -28,7 +28,8 @@ def calculate_minimum_distance(test_vector, vectorized_data):
     return md, mdv, min_index
 
 def get_closest_planet(test_vector):
-    baked_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_final_data.npz"
+    # baked_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_final_data.npz"
+    baked_fwp = "/home/marcus/McGill/McGill-Physics-AI-Hackathon/data/planets_final_data.npz"
     data = np.load(baked_fwp, allow_pickle=True)["arr_0"].item()
     print(data)
     n = 1075  # Number of planets that have all six parameters
@@ -41,7 +42,8 @@ def get_closest_planet(test_vector):
     closest_planet_data = results[1]
     print("The test vector is {}".format(test_vector))
     print("The minimum distance between the test vector and the data set is {} and the closest point is {} with index {} in the original data set".format(results[0], results[1], results[2]))
-    original_data_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_2019.11.01_20.07.23_master_data.npz"
+    #original_data_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_2019.11.01_20.07.23_master_data.npz"
+    original_data_fwp = "/home/marcus/McGill/McGill-Physics-AI-Hackathon/data/planets_2019.11.01_20.07.23_master_data.npz"
     original_data = np.load(original_data_fwp, allow_pickle=True)["arr_0"]
     checks = []
     found_item = None

@@ -8,6 +8,7 @@ from plotly.tools import mpl_to_plotly
 from astropy import constants, units
 import pandas as pd
 from matplotlib.cm import get_cmap
+from analysis import planet_finder
 
 import rebound
 
@@ -244,18 +245,23 @@ def get_results(
     planet_num,
 ):
     try:
-        planet_num = planet_num - 1
+        i = planet_num - 1
         list_to_give = [
             n_planets,
-            planet_mass[planet_num],
-            semi_major_axis[planet_num],
-            eccentricity[planet_num],
+            planet_mass[i],
+            semi_major_axis[i],
+            eccentricity[i],
             stellar_mass,
             stellar_temp
         ]
-        #vals_retrieved = andrew_function(
-        #    list_to_give
-        #)
+        closest = planet_finder.get_closest_planet(
+            list_to_give
+        )
+        return_str = ("The most similar planet to the one requested in your system is %s\n" % (closest["pl_name"])+
+                "This planet's system has %s planets\n" % (closest["pl_pnum"]) + 
+                "The stellar mass of the host star is %.2e M_sun, and its temperature is %.2e K\n" % (closest["st_mass"], closest["st_teff"]) + 
+                "The semi major axis of this planet is %.2e AU\n with eccentricity e = %.2e\n" % (closest["pl_orbsmax"], closest["pl_orbeccen"]) + 
+                "The mass of this planet is %.2e M_jup" % (closest["pl_bmassj"]))
         return("Values given: {}".format(list_to_give))
     except:
         return("Waiting for all data inputs...")

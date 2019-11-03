@@ -243,8 +243,22 @@ def get_results(
     eccentricity,
     planet_num,
 ):
-    return
-
+    try:
+        planet_num = planet_num - 1
+        list_to_give = [
+            n_planets,
+            planet_mass[planet_num],
+            semi_major_axis[planet_num],
+            eccentricity[planet_num],
+            stellar_mass,
+            stellar_temp
+        ]
+        #vals_retrieved = andrew_function(
+        #    list_to_give
+        #)
+        return("Values given: {}".format(list_to_give))
+    except:
+        return("Waiting for all data inputs...")
 
 @app.callback(
     Output("plot", "src"),

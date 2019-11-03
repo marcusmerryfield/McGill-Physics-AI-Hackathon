@@ -11,19 +11,21 @@ import rebound
 from io import BytesIO
 import base64
 
+
 def fig_to_uri(in_fig, close_all=True, **save_args):
     # type: (plt.Figure) -> str
     """
     Save a figure as a URI
     """
     out_img = BytesIO()
-    in_fig.savefig(out_img, format='png', **save_args)
+    in_fig.savefig(out_img, format="png", **save_args)
     if close_all:
         in_fig.clf()
-        plt.close('all')
+        plt.close("all")
     out_img.seek(0)  # rewind file
     encoded = base64.b64encode(out_img.read()).decode("ascii").replace("\n", "")
     return "data:image/png;base64,{}".format(encoded)
+
 
 app = dash.Dash(__name__)
 
@@ -65,14 +67,14 @@ app.layout = html.Div(
                     children=[
                         html.Label("Number of Planets", style={"margin-top": "0px"}),
                         dcc.Dropdown(
-                            id="n_planets", 
+                            id="n_planets",
                             options=[
                                 {"label": "1", "value": 1},
                                 {"label": "2", "value": 2},
                                 {"label": "3", "value": 3},
                                 {"label": "4", "value": 4},
-                                {"label": "5", "value": 5}
-                            ]
+                                {"label": "5", "value": 5},
+                            ],
                         ),
                         html.Label("Stellar Mass", style={"margin-top": "0px"}),
                         html.Br(),
@@ -142,9 +144,9 @@ app.layout = html.Div(
                     },
                 ),
                 html.Div(
-                    id='plot_div',
+                    id="plot_div",
                     className="two columns",
-                    children=[html.Img(id="plot", src='',)],
+                    children=[html.Img(id="plot", src="")],
                     style={"width": "55%", "display": "inline-block"},
                 ),
             ],
@@ -176,9 +178,9 @@ def update_figure(
         len(i) == n_planets for i in [planet_mass, semi_major_axis, eccentricity]
     ), "The number of planet masses, semi-major axes, and eccentricities must be equal!"
     assert all(0 <= i < 1 for i in eccentricity), "Eccentricity values must 0 <= e < 1!"
-    
+
     # Pretiffy with random arguments of pericenter
-    omega = np.random.random(int(n_planets))*2*np.pi
+    omega = np.random.random(int(n_planets)) * 2 * np.pi
 
     # Use rebound to create a figure of orbits
     sim = rebound.Simulation()
@@ -188,18 +190,19 @@ def update_figure(
     r_a = []
     b = []
     for a, e in zip(semi_major_axis, eccentricity):
-        r_p.append((1-e)*a)
-        r_a.append((1+e)*a)
-        b.append(((1 - e**2)*a**2)**(1/2))
+        r_p.append((1 - e) * a)
+        r_a.append((1 + e) * a)
+        b.append(((1 - e ** 2) * a ** 2) ** (1 / 2))
 
     r_a_max = np.max(r_a)
     r_p_max = np.max(r_p)
     b_max = np.max(b)
+    offset_x = r_a_max * 0.1
 
     # Add in stellar information
     sim.add(m=stellar_mass)
     for mass, a, e, o in zip(planet_mass, semi_major_axis, eccentricity, omega):
-        sim.add(primary=sim.particles[0], m=mass, a=a, e=e, omega=o, Omega=0)
+        sim.add(primary=sim.particles[0], m=mass, a=a, e=e, omega=0)
 
     particles_x = []
     particles_y = []
@@ -212,7 +215,13 @@ def update_figure(
     y_max = np.max(particles_y)
     y_min = np.min(particles_y)
 
-    fig, ax = rebound.OrbitPlot(sim, color=True, xlim=[-r_a_max, r_p_max], ylim=[-y_min*1.1, y_max*1.1], lw=5)
+    fig, ax = rebound.OrbitPlot(
+        sim,
+        color=True,
+        xlim=[-(r_a_max + offset_x), r_p_max + offset_x],
+        ylim=[-b_max * 1.1, b_max * 1.1],
+        lw=5,
+    )
     out_url = fig_to_uri(fig)
     return out_url
 

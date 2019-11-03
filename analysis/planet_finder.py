@@ -56,7 +56,9 @@ def get_closest_planet(test_vector):
             found_item = item
             print(found_item)
     print("The name of the planet is {}".format(found_item["pl_name"]))
+    return found_item
 
 if __name__ == "__main__":
-    # test_vector = [1., 1.34845361, 5.1521304, 0., 1.0734717, 0.4176236]
+	# Short test
+    test_vector = [1., 1.34845361, 5.1521304, 0., 1.0734717, 0.4176236]
     get_closest_planet(test_vector)

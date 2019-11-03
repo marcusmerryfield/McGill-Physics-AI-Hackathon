@@ -30,6 +30,10 @@ def calculate_minimum_distance(test_vector, vectorized_data):
 def get_closest_planet(test_vector):
     # baked_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_final_data.npz"
     baked_fwp = "/home/marcus/McGill/McGill-Physics-AI-Hackathon/data/planets_final_data.npz"
+    medians = [1.0, 0.97, 0.2699, 0.11, 1.06, 5521.0]
+    # Divide the received data by the medians
+    for i in range(len(test_vector)):
+        test_vector[i] = medians[i]
     data = np.load(baked_fwp, allow_pickle=True)["arr_0"].item()
     print(data)
     n = 1075  # Number of planets that have all six parameters

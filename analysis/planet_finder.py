@@ -48,6 +48,7 @@ def get_closest_planet(test_vector):
     original_data_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_2019.11.01_20.07.23_master_data.npz"
     original_data = np.load(original_data_fwp, allow_pickle=True)["arr_0"]
     found_item = None
+    # checks = []
     for item in original_data:
         i = 0
         checks = []
@@ -64,5 +65,7 @@ def get_closest_planet(test_vector):
 
 if __name__ == "__main__":
 	# Short test
-    test_vector = [1., 1.34845361, 5.1521304, 0., 1.0734717, 0.4176236]
+    test_vector = np.array([1., 1.14845361, 3.1521304, 0., 1.0734717, 0.4176236])
+    medians = np.array([1.0, 0.97, 0.2699, 0.11, 1.06, 5521.0])
+    test_vector = test_vector*medians
     get_closest_planet(test_vector)

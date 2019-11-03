@@ -8,6 +8,7 @@ from plotly.tools import mpl_to_plotly
 from astropy import constants, units
 import pandas as pd
 from matplotlib.cm import get_cmap
+from analysis import planet_finder
 
 import rebound
 
@@ -243,21 +244,30 @@ def get_results(
     eccentricity,
     planet_num,
 ):
+    string_list = [planet_mass, semi_major_axis, eccentricity]
+    planet_mass, semi_major_axis, eccentricity = comma_strings_to_list(string_list)
     try:
-        planet_num = planet_num - 1
+        i = planet_num - 1
         list_to_give = [
-            n_planets,
-            planet_mass[planet_num],
-            semi_major_axis[planet_num],
-            eccentricity[planet_num],
-            stellar_mass,
-            stellar_temp
+            float(n_planets),
+            float(planet_mass[i]),
+            float(semi_major_axis[i]),
+            float(eccentricity[i]),
+            float(stellar_mass),
+            float(stellar_temp)
         ]
-        #vals_retrieved = andrew_function(
-        #    list_to_give
-        #)
-        return("Values given: {}".format(list_to_give))
-    except:
+        closest = planet_finder.get_closest_planet(
+            list_to_give
+        )
+        return_str = ("The most similar planet to the one requested in your system is %s " % (closest["pl_name"])+
+                "This planet's system has %s planets " % (float(closest["pl_pnum"])) + 
+                "The stellar mass of the host star is %.2e M_sun, and its temperature is %.2e K " % (float(closest["st_mass"]), float(closest["st_teff"])) + 
+                "The semi major axis of this planet is %.2e AU with eccentricity e = %.2e " % (float(closest["pl_orbsmax"]), float(closest["pl_orbeccen"])) + 
+                "The mass of this planet is %.2e M_jup" % (float(closest["pl_bmassj"])))
+        print(return_str)
+        return(return_str)
+    except Exception as e:
+        print(e)
         return("Waiting for all data inputs...")
 
 @app.callback(
@@ -276,7 +286,6 @@ def update_figure(
 ):
 
     string_list = [planet_mass, semi_major_axis, eccentricity]
-    print(string_list)
     planet_mass, semi_major_axis, eccentricity = comma_strings_to_list(string_list)
     assert all(
         len(i) == n_planets for i in [planet_mass, semi_major_axis, eccentricity]

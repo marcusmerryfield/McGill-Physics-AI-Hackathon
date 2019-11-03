@@ -33,15 +33,15 @@ def get_closest_planet(test_vector):
     medians = [1.0, 0.97, 0.2699, 0.11, 1.06, 5521.0]
     # Divide the received data by the medians
     for i in range(len(test_vector)):
-        test_vector[i] = medians[i]
+        test_vector[i] = test_vector[i]/medians[i]
     data = np.load(baked_fwp, allow_pickle=True)["arr_0"].item()
-    print(data)
+    #print(data)
     n = 1075  # Number of planets that have all six parameters
     variables = ["pl_pnum", "pl_bmassj", "pl_orbsmax", "pl_orbeccen", "st_mass", "st_teff"]
     vectorized_data = np.zeros([n, len(variables)])
     for k in range(n):
         vectorized_data[k] = vectorize(data, n, variables, k)
-    print(vectorized_data)
+    #print(vectorized_data)
     results = calculate_minimum_distance(test_vector, vectorized_data)
     closest_planet_data = results[1]
     print("The test vector is {}".format(test_vector))
@@ -60,7 +60,7 @@ def get_closest_planet(test_vector):
         i += 1
         if len(checks) == 6:
             found_item = item
-            print(found_item)
+            #print(found_item)
     print("The name of the planet is {}".format(found_item["pl_name"]))
     return found_item
 

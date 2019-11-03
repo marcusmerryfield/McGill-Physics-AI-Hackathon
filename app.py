@@ -247,23 +247,25 @@ def get_results(
     try:
         i = planet_num - 1
         list_to_give = [
-            n_planets,
-            planet_mass[i],
-            semi_major_axis[i],
-            eccentricity[i],
-            stellar_mass,
-            stellar_temp
+            float(n_planets),
+            float(planet_mass[i]),
+            float(semi_major_axis[i]),
+            float(eccentricity[i]),
+            float(stellar_mass),
+            float(stellar_temp)
         ]
         closest = planet_finder.get_closest_planet(
             list_to_give
         )
-        return_str = ("The most similar planet to the one requested in your system is %s\n" % (closest["pl_name"])+
-                "This planet's system has %s planets\n" % (closest["pl_pnum"]) + 
-                "The stellar mass of the host star is %.2e M_sun, and its temperature is %.2e K\n" % (closest["st_mass"], closest["st_teff"]) + 
-                "The semi major axis of this planet is %.2e AU\n with eccentricity e = %.2e\n" % (closest["pl_orbsmax"], closest["pl_orbeccen"]) + 
-                "The mass of this planet is %.2e M_jup" % (closest["pl_bmassj"]))
-        return("Values given: {}".format(list_to_give))
-    except:
+        return_str = ("The most similar planet to the one requested in your system is %s" % (closest["pl_name"])+
+                "This planet's system has %s planets" % (float(closest["pl_pnum"])) + 
+                "The stellar mass of the host star is %.2e M_sun, and its temperature is %.2e K" % (float(closest["st_mass"]), float(closest["st_teff"])) + 
+                "The semi major axis of this planet is %.2e AU with eccentricity e = %.2e" % (float(closest["pl_orbsmax"]), float(closest["pl_orbeccen"])) + 
+                "The mass of this planet is %.2e M_jup" % (float(closest["pl_bmassj"])))
+        print(return_str)
+        return(return_str)
+    except Exception as e:
+        print(e)
         return("Waiting for all data inputs...")
 
 @app.callback(

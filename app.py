@@ -5,11 +5,30 @@ from dash.dependencies import Input, Output, State
 from matplotlib import pyplot as plt
 import numpy as np
 from plotly.tools import mpl_to_plotly
+from astropy import constants, units
+import pandas as pd
+from matplotlib.cm import get_cmap
 
 import rebound
 
 from io import BytesIO
 import base64
+
+jup_to_stellar = constants.M_jup / constants.M_sun
+data = pd.read_csv("./data/planets_2019.11.01_20.07.23.csv")
+
+
+def get_min_max(arr):
+    return (np.nanmin(arr), np.nanmax(arr))
+
+
+m_s_min, m_s_max = get_min_max(data.st_mass.values)
+m_j_min, m_j_max = get_min_max(data.pl_bmassj.values)
+T_s_min, T_s_max = get_min_max(data.st_teff.values)
+n_p_min, n_p_max = get_min_max(data.pl_pnum.values)
+a_min, a_max = get_min_max(data.pl_orbsmax.values)
+e_min, e_max = get_min_max(data.pl_orbeccen.values)
+cmap = get_cmap("Spectral")
 
 
 def fig_to_uri(in_fig, close_all=True, **save_args):
@@ -25,6 +44,25 @@ def fig_to_uri(in_fig, close_all=True, **save_args):
     out_img.seek(0)  # rewind file
     encoded = base64.b64encode(out_img.read()).decode("ascii").replace("\n", "")
     return "data:image/png;base64,{}".format(encoded)
+
+
+def comma_strings_to_list(comma_lists):
+    """
+    Convert a list of strings which contain comma separated values
+    to lists
+    """
+    lists = []
+    for comma_list in comma_lists:
+        list_thing = [float(i) for i in comma_list.split(",")]
+        lists.append(list_thing)
+    return lists
+
+
+def scale_cmap(T):
+    a = 1 / (T_s_max - T_s_min)
+    b = 1 - a * T_s_max
+    val = a * T + b
+    return val
 
 
 app = dash.Dash(__name__)
@@ -74,50 +112,61 @@ app.layout = html.Div(
                                 {"label": "3", "value": 3},
                                 {"label": "4", "value": 4},
                                 {"label": "5", "value": 5},
+                                {"label": "6", "value": 6},
+                                {"label": "7", "value": 7},
+                                {"label": "8", "value": 8},
                             ],
                         ),
-                        html.Label("Stellar Mass", style={"margin-top": "0px"}),
+                        html.Label("Stellar Mass (M_sun)", style={"margin-top": "0px"}),
                         html.Br(),
                         dcc.Input(
                             id="stellar_mass",
                             type="number",
-                            placeholder="0.5 M_sun < M < 50 M_sun",
+                            placeholder="Exoplanet Archive Value Range: %.2e - %.2e M_sun"
+                            % (m_s_min, m_s_max),
                             style={
                                 "margin-top": "0px",
                                 "display": "inline-block",
                                 "width": "100%",
                             },
                         ),
-                        html.Label("Stellar Temperature", style={"margin-top": "0px"}),
+                        html.Label(
+                            "Stellar Temperature (K)", style={"margin-top": "0px"}
+                        ),
                         html.Br(),
                         dcc.Input(
                             id="stellar_temp",
                             type="number",
-                            placeholder="1000 K < T < 50000 K",
+                            placeholder="Exoplanet Archive Value Range: %.2e - %.2e K"
+                            % (T_s_min, T_s_max),
                             style={
                                 "margin-top": "0px",
                                 "display": "inline-block",
                                 "width": "100%",
                             },
                         ),
-                        html.Label("Planet Masses", style={"margin-top": "0px"}),
+                        html.Label(
+                            "Planet Masses (M_jup)", style={"margin-top": "0px"}
+                        ),
                         html.Br(),
                         dcc.Input(
                             id="planet_mass",
                             type="text",
-                            placeholder="(comma separated, 0.5 M_earth < Mass < 30 M_earth)",
+                            placeholder="(comma separated, Exoplanet Archive Value Range: %.2e - %.2e M_jup)"
+                            % (m_j_min, m_j_max),
                             style={
                                 "margin-top": "0px",
                                 "display": "inline-block",
                                 "width": "100%",
                             },
                         ),
-                        html.Label("Semi-Major Axes", style={"margin-top": "0px"}),
+                        html.Label("Semi-Major Axes (AU)", style={"margin-top": "0px"}),
                         html.Br(),
                         dcc.Input(
                             id="semi_major_axis",
                             type="text",
-                            placeholder="(comma separated, 0.01 AU < a < 100 AU)",
+                            placeholder="(comma separated, Exoplanet Archive Value Range: %.2e - %.2e AU)"
+                            % (a_min, a_max),
                             style={
                                 "margin-top": "0px",
                                 "display": "inline-block",
@@ -149,11 +198,52 @@ app.layout = html.Div(
                     children=[html.Img(id="plot", src="")],
                     style={"width": "55%", "display": "inline-block"},
                 ),
+                html.Div(
+                    id="button_div",
+                    className="two columns",
+                    children=[
+                        dcc.Input(
+                            id="choose_planet",
+                            type="number",
+                            placeholder="Pick a planet number for which you want to find a similar system!",
+                            style={
+                                "margin-top": "0px",
+                                "display": "inline-block",
+                                "width": "50%",
+                            },
+                        )
+                    ],
+                ),
+                html.Div(id="results_div", className="two columns"),
             ],
             style={"text-align": "center"},
         ),
     ]
 )
+
+
+@app.callback(
+    Output("results_div", "children"),
+    [
+        Input("n_planets", "value"),
+        Input("stellar_mass", "value"),
+        Input("stellar_temp", "value"),
+        Input("planet_mass", "value"),
+        Input("semi_major_axis", "value"),
+        Input("eccentricity", "value"),
+        Input("choose_planet", "value"),
+    ],
+)
+def get_results(
+    n_planets,
+    stellar_mass,
+    stellar_temp,
+    planet_mass,
+    semi_major_axis,
+    eccentricity,
+    planet_num,
+):
+    return
 
 
 @app.callback(
@@ -171,15 +261,15 @@ def update_figure(
     n_planets, stellar_mass, stellar_temp, planet_mass, semi_major_axis, eccentricity
 ):
 
-    planet_mass = [float(i) for i in planet_mass.split(",")]
-    semi_major_axis = [float(i) for i in semi_major_axis.split(",")]
-    eccentricity = [float(i) for i in eccentricity.split(",")]
+    string_list = [planet_mass, semi_major_axis, eccentricity]
+    print(string_list)
+    planet_mass, semi_major_axis, eccentricity = comma_strings_to_list(string_list)
     assert all(
         len(i) == n_planets for i in [planet_mass, semi_major_axis, eccentricity]
-    ), "The number of planet masses, semi-major axes, and eccentricities must be equal!"
+    ), "The number of planet masses, semi-major axes, and eccentricities must equal the number of planets!"
     assert all(0 <= i < 1 for i in eccentricity), "Eccentricity values must 0 <= e < 1!"
 
-    # Pretiffy with random arguments of pericenter
+    # Pretiffy with random arguments of pericenter (not currently using)
     omega = np.random.random(int(n_planets)) * 2 * np.pi
 
     # Use rebound to create a figure of orbits
@@ -202,6 +292,7 @@ def update_figure(
     # Add in stellar information
     sim.add(m=stellar_mass)
     for mass, a, e, o in zip(planet_mass, semi_major_axis, eccentricity, omega):
+        mass = mass * jup_to_stellar
         sim.add(primary=sim.particles[0], m=mass, a=a, e=e, omega=0)
 
     particles_x = []
@@ -215,13 +306,18 @@ def update_figure(
     y_max = np.max(particles_y)
     y_min = np.min(particles_y)
 
+    # Use rebound to plot
+    star_color = scale_cmap(stellar_temp)
+    color_val = cmap(star_color)
     fig, ax = rebound.OrbitPlot(
         sim,
         color=True,
         xlim=[-(r_a_max + offset_x), r_p_max + offset_x],
         ylim=[-b_max * 1.1, b_max * 1.1],
-        lw=5,
+        lw=3,
+        star_color=color_val,
     )
+    # Hack in mpl image so that dash can use it
     out_url = fig_to_uri(fig)
     return out_url
 

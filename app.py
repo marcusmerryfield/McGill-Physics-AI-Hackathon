@@ -257,10 +257,10 @@ def get_results(
         closest = planet_finder.get_closest_planet(
             list_to_give
         )
-        return_str = ("The most similar planet to the one requested in your system is %s" % (closest["pl_name"])+
-                "This planet's system has %s planets" % (float(closest["pl_pnum"])) + 
-                "The stellar mass of the host star is %.2e M_sun, and its temperature is %.2e K" % (float(closest["st_mass"]), float(closest["st_teff"])) + 
-                "The semi major axis of this planet is %.2e AU with eccentricity e = %.2e" % (float(closest["pl_orbsmax"]), float(closest["pl_orbeccen"])) + 
+        return_str = ("The most similar planet to the one requested in your system is %s " % (closest["pl_name"])+
+                "This planet's system has %s planets " % (float(closest["pl_pnum"])) + 
+                "The stellar mass of the host star is %.2e M_sun, and its temperature is %.2e K " % (float(closest["st_mass"]), float(closest["st_teff"])) + 
+                "The semi major axis of this planet is %.2e AU with eccentricity e = %.2e " % (float(closest["pl_orbsmax"]), float(closest["pl_orbeccen"])) + 
                 "The mass of this planet is %.2e M_jup" % (float(closest["pl_bmassj"])))
         print(return_str)
         return(return_str)

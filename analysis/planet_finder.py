@@ -50,17 +50,18 @@ def get_closest_planet(test_vector):
     original_data_fwp = "/home/marcus/McGill/McGill-Physics-AI-Hackathon/data/planets_2019.11.01_20.07.23_master_data.npz"
     original_data = np.load(original_data_fwp, allow_pickle=True)["arr_0"]
     found_item = None
+    #print("closest planet data: {}".format(closest_planet_data))
     for item in original_data:
         i = 0
         checks = []
         for var in variables:
             if item[var] != "":
-                if float(item[var]) == closest_planet_data[i]:
+                if float(item[var])/medians[i] == float(closest_planet_data[i]):
                     checks.append(True) 
-        i += 1
+            i += 1
         if len(checks) == 6:
             found_item = item
-            #print(found_item)
+            print(found_item)
     print("The name of the planet is {}".format(found_item["pl_name"]))
     return found_item
 

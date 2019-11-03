@@ -31,7 +31,7 @@ def get_closest_planet(test_vector):
     medians = [1.0, 0.97, 0.2699, 0.11, 1.06, 5521.0]
     # Divide the received data by the medians
     for i in range(len(test_vector)):
-        test_vector[i] = medians[i]
+        test_vector[i] = test_vector[i]/medians[i]
     baked_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_final_data.npz"
     data = np.load(baked_fwp, allow_pickle=True)["arr_0"].item()
     print(data)
@@ -47,10 +47,10 @@ def get_closest_planet(test_vector):
     print("The minimum distance between the test vector and the data set is {} and the closest point is {} with index {} in the original data set".format(results[0], results[1], results[2]))
     original_data_fwp = "/Users/azwaniga/McGill-Physics-AI-Hackathon/data/planets_2019.11.01_20.07.23_master_data.npz"
     original_data = np.load(original_data_fwp, allow_pickle=True)["arr_0"]
-    checks = []
     found_item = None
     for item in original_data:
         i = 0
+        checks = []
         for var in variables:
             if item[var] != "":
                 if float(item[var]) == closest_planet_data[i]:
